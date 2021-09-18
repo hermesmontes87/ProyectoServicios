@@ -41,6 +41,7 @@ pipeline {
         }
         stage('Container Run') {
             steps {
+                sh 'docker stop --name microservicio-service'
                 sh 'docker run -d --rm --name microservicio-service -p 8090:8090 microservicio-service'
             }
         }
