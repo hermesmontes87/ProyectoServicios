@@ -79,5 +79,21 @@ pipeline {
                 sh 'docker run -d --rm --name microservicio-service -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
             }
         }
+        stage('Testing') {
+            steps {
+                dir('cypress/') {
+                    sh 'docker run --rm --name Cypress -v /Users/hermes/Documents/capacitacion/microservicios/devops-microservicios/ecosistema-jenkins/jenkins_home/workspace/Pruebas/cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
+                }
+            }
+        }
+        stage('tar videos') {
+            steps {
+                dir('cypress/cypress/videos/') {
+                    sh 'tar -cvf videos.tar .'
+                    archiveArtifacts artifacts: 'videos.tar',
+                    allowEmptyArchive: true
+                }
+            }
+        }
     }
 }
