@@ -33,7 +33,7 @@ pipeline {
                 }
             }
         }
-        stage('Frontend') {
+        stage('Frontend Angular') {
             steps {
                 echo 'Building Frontend'
                     dir('frontend/'){
