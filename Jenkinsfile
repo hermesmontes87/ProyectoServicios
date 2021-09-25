@@ -25,7 +25,7 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 timeout(time: 1, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                    waitForQualityGate abortPipeline: false
                 }
             }
         }
@@ -41,7 +41,7 @@ pipeline {
         }
         stage('Container Run') {
             steps {
-                sh 'docker stop microservicio-service'
+                sh 'docker stop microservicio-service || true'
                 sh 'docker run -d --rm --name microservicio-service -p 8090:8090 microservicio-service'
             }
         }
