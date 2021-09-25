@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        LOCAL_SERVER = '192.168.1.6:8083'
+    }
     tools {
         maven 'M3_8_2'
     }
@@ -34,6 +37,16 @@ pipeline {
                 dir('microservicio-service/'){
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                         sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t microservicio-service .'
+                    }
+                }
+            }
+        }
+        stage('Container Push Nexus') {
+            steps {
+                dir('microservicio-service/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login ${LOCAL_SERVER} -u $USERNAME -p $PASSWORD'
                         sh 'docker build -t microservicio-service .'
                     }
                 }
