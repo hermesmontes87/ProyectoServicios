@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        LOCAL_SERVER = '192.168.1.6:8083'
+        LOCAL_SERVER = '192.168.1.6'
     }
     tools {
         maven 'M3_8_2'
@@ -44,18 +44,17 @@ pipeline {
         }
         stage('Container Push Nexus') {
             steps {
-                dir('microservicio-service/'){
-                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                        sh 'docker login ${LOCAL_SERVER} -u $USERNAME -p $PASSWORD'
-                        sh 'docker build -t microservicio-service .'
-                    }
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    sh 'docker login ${LOCAL_SERVER}:8083 -u $USERNAME -p $PASSWORD'
+                    sh 'docker tag microservicio-service:latest ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
+                    /*sh 'docker push ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'*/
                 }
             }
         }
         stage('Container Run') {
             steps {
                 sh 'docker stop microservicio-service || true'
-                sh 'docker run -d --rm --name microservicio-service -p 8090:8090 microservicio-service'
+                sh 'docker run -d --rm --name microservicio-service -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
             }
         }
     }
