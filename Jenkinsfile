@@ -64,6 +64,30 @@ pipeline {
                 }
             }
         }
+        stage('Zuul') {
+            steps {
+                dir('ZuulBase/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t zuul .'
+                        sh 'docker stop zuul || true'
+                        sh 'docker run -d --rm --name zuul-service -p 8000:8000 zuul'
+                    }
+                }
+            }
+        }
+        stage('Eureka') {
+            steps {
+                dir('EurekaBase/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t eureka .'
+                        sh 'docker stop eureka || true'
+                        sh 'docker run -d --rm --name eureka-service -p 8000:8000 eureka'
+                    }
+                }
+            }
+        }
         stage('Container Push Nexus') {
             steps {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
