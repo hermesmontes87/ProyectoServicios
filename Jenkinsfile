@@ -88,7 +88,7 @@ pipeline {
         }
         stage('tar videos') {
             steps {
-                dir('cypress/cypress/videos/')
+                dir('cypress/cypress/videos/'){
                     sh 'tar -cvf videos.tar .'
                     archiveArtifacts artifacts: 'videos.tar',
                     allowEmptyArchive: true
