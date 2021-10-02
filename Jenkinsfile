@@ -82,7 +82,7 @@ pipeline {
         stage('Testing') {
             steps {
                 dir('cypress/') {
-                    sh 'docker run --rm --name Cypress -v /Users/hermes/Documents/capacitacion/microservicios/devops-microservicios/ecosistema-jenkins/jenkins_home/workspace/microservicio-prueba/Cypress/cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
+                    sh 'docker run --rm --name Cypress -v /Users/hermes/Documents/capacitacion/microservicios/devops-microservicios/ecosistema-jenkins/jenkins_home/workspace/microservicio-prueba/Cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
                 }
             }
         }
