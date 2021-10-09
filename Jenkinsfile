@@ -36,6 +36,14 @@ pipeline {
             }
         }
         stage('Quality Gate') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 timeout(time: 1, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: false
