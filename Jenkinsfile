@@ -9,6 +9,14 @@ pipeline {
     }
     stages {
         stage('Build and Analize') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('microservicio-service/'){
                     echo 'Execute Maven and Analizing with SonarServer'
@@ -35,6 +43,14 @@ pipeline {
             }
         }
         stage('Frontend Angular') {
+            when{
+                anyOf {
+                    changeset "*frontend/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 echo 'Building Frontend'
                     dir('frontend/'){
@@ -47,6 +63,14 @@ pipeline {
             }
         }
         stage('Database') {
+            when{
+                anyOf {
+                    changeset "*liquibase/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('liquibase/'){
                     sh '/opt/liquibase/liquibase --version'
@@ -56,6 +80,14 @@ pipeline {
             }
         }
         stage('Container Build') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('microservicio-service/'){
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -66,6 +98,14 @@ pipeline {
             }
         }
         stage('Zuul') {
+            when{
+                anyOf {
+                    changeset "*ZuulBase/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('ZuulBase/'){
                     sh 'mvn clean package'
@@ -79,6 +119,14 @@ pipeline {
             }
         }
         stage('Eureka') {
+            when{
+                anyOf {
+                    changeset "*EurekaBase/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('EurekaBase/'){
                     sh 'mvn clean package'
@@ -92,6 +140,14 @@ pipeline {
             }
         }
         stage('Container Push Nexus') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                     sh 'docker login ${LOCAL_SERVER}:8083 -u $USERNAME -p $PASSWORD'
@@ -101,6 +157,14 @@ pipeline {
             }
         }
         stage('Container Run') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 sh 'docker stop microservicio-service || true'
                 sh 'docker run -d --rm --name microservicio-service -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
@@ -110,6 +174,14 @@ pipeline {
             }
         }
         stage('Testing') {
+            when{
+                anyOf {
+                    changeset "*cypress/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('cypress/') {
                     sh 'docker run --rm --name Cypress -v /Users/hermes/Documents/capacitacion/microservicios/devops-microservicios/ecosistema-jenkins/jenkins_home/workspace/microservicio-prueba/Cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
@@ -117,6 +189,14 @@ pipeline {
             }
         }
         stage('tar videos') {
+            when{
+                anyOf {
+                    changeset "*Cypress/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('Cypress/cypress/videos/'){
                     sh 'tar -cvf videos.tar .'
