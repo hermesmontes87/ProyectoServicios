@@ -70,8 +70,8 @@ pipeline {
                     sh 'mvn clean package'
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                         sh 'docker login -u $USERNAME -p $PASSWORD'
-                        sh 'docker build -t zuul .'
                         sh 'docker stop zuul || true'
+                        sh 'docker build -t zuul .'
                         sh 'docker run -d --rm --name zuul-service -p 8000:8000 zuul'
                     }
                 }
@@ -83,8 +83,8 @@ pipeline {
                     sh 'mvn clean package'
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                         sh 'docker login -u $USERNAME -p $PASSWORD'
-                        sh 'docker build -t eureka .'
                         sh 'docker stop eureka || true'
+                        sh 'docker build -t eureka .'
                         sh 'docker run -d --rm --name eureka-service -p 8761:8761 eureka'
                     }
                 }
