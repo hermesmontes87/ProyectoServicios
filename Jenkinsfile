@@ -35,10 +35,52 @@ pipeline {
                 }
             }
         }
+        stage('Build and Analize - two') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service-two/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
+            steps {
+                dir('microservicio-service-two/'){
+                    echo 'Execute Maven and Analizing with SonarServer'
+                    withSonarQubeEnv('SonarServer') {
+                        /*sh "mvn clean package dependency-check:check sonar:sonar \*/
+                        sh "mvn clean package sonar:sonar \
+                            -Dsonar.projectKey=21_MyCompany_Microservice_Two \
+                            -Dsonar.projectName=21_MyCompany_Microservice_Two \
+                            -Dsonar.sources=src/main \
+                            -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
+                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                            -Djacoco.output=tcpclient \
+                            -Djacoco.address=127.0.0.1 \
+                            -Djacoco.port=10001"
+                    }
+                }
+            }
+        }
         stage('Quality Gate') {
             when{
                 anyOf {
                     changeset "*microservicio-service/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
+            steps {
+                timeout(time: 1, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }
+        stage('Quality Gate Two') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service-two/**"
                     expression {
                         currentBuild.previousBuild.result != "SUCCESS"
                     }
@@ -105,6 +147,24 @@ pipeline {
                 }
             }
         }
+        stage('Container Build Two') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service-two/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
+            steps {
+                dir('microservicio-service-two/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t microservicio-service-two .'
+                    }
+                }
+            }
+        }
         stage('Zuul') {
             when{
                 anyOf {
@@ -164,6 +224,23 @@ pipeline {
                 }
             }
         }
+        stage('Container Push Nexus Two') {
+            when{
+                anyOf {
+                    changeset "*microservicio-service-two/**"
+                    expression {
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    sh 'docker login ${LOCAL_SERVER}:8083 -u $USERNAME -p $PASSWORD'
+                    sh 'docker tag microservicio-service-two:latest ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus-two:dev'
+                    sh 'docker push ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus-two:dev'
+                }
+            }
+        }
         stage('Container Run') {
             steps {
                 sh 'docker stop microservicio-service || true'
@@ -171,6 +248,15 @@ pipeline {
 
                 sh 'docker stop microservicio-service-one || true'
                 sh 'docker run -d --rm --name microservicio-service-one -e SPRING_PROFILES_ACTIVE=qa ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
+            }
+        }
+        stage('Container Run Two') {
+            steps {
+                sh 'docker stop microservicio-service-two || true'
+                sh 'docker run -d --rm --name microservicio-service-two -e SPRING_PROFILES_ACTIVE=qa ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus-two:dev'
+
+                sh 'docker stop microservicio-service-two-one || true'
+                sh 'docker run -d --rm --name microservicio-service-two-one -e SPRING_PROFILES_ACTIVE=qa ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus-two:dev'
             }
         }
         stage('Testing') {
