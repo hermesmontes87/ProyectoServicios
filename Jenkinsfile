@@ -30,7 +30,8 @@ pipeline {
                             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                             -Djacoco.output=tcpclient \
                             -Djacoco.address=127.0.0.1 \
-                            -Djacoco.port=10001"
+                            -Djacoco.port=10001 \
+                            -DskipTests"
                     }
                 }
             }
