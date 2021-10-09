@@ -85,7 +85,7 @@ pipeline {
                         sh 'docker login -u $USERNAME -p $PASSWORD'
                         sh 'docker build -t eureka .'
                         sh 'docker stop eureka || true'
-                        sh 'docker run -d --rm --name eureka-service -p 8000:8000 eureka'
+                        sh 'docker run -d --rm --name eureka-service -p 8761:8761 eureka'
                     }
                 }
             }
@@ -121,7 +121,7 @@ pipeline {
                 }
             }
         }
-        stage('Estres') {
+        /*stage('Estres') {
             steps {
                 dir('gatling/'){
                     sh 'mvn gatling:test'
@@ -132,7 +132,7 @@ pipeline {
                     gatlingArchive()
                 }
             }
-        }
+        }*/
     }
     /*post {
         always {
