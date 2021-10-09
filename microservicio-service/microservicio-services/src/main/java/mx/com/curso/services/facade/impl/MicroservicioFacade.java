@@ -11,8 +11,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.ws.Response;
-
 @Component
 public class MicroservicioFacade implements IMicroservicioFacade {
     @Autowired
