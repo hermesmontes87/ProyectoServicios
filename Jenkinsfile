@@ -167,10 +167,10 @@ pipeline {
         stage('Container Run') {
             steps {
                 sh 'docker stop microservicio-service || true'
-                sh 'docker run -d --rm --name microservicio-service -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
+                sh 'docker run -d --rm --name microservicio-service -e SPRING_PROFILES_ACTIVE=qa ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
 
                 sh 'docker stop microservicio-service-one || true'
-                sh 'docker run -d --rm --name microservicio-service-one -e SPRING_PROFILES_ACTIVE=qa -p 8091:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
+                sh 'docker run -d --rm --name microservicio-service-one -e SPRING_PROFILES_ACTIVE=qa ${LOCAL_SERVER}:8083/repository/docker-private/microservicio-nexus:dev'
             }
         }
         stage('Testing') {
