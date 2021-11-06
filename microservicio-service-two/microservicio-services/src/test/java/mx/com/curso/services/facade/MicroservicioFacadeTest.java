@@ -13,6 +13,6 @@ public class MicroservicioFacadeTest extends BaseTest {
 
         List<UserTO> users = this.microservicioFacade.getAllUsers();
 
-        Assert.assertEquals(1, users.size());
+        Assert.assertEquals(2, users.size());
     }
 }

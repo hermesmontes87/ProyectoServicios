@@ -13,6 +13,6 @@ public class MicroservicioServiceTest extends BaseTest {
 
         List<UserTO> users = this.microservicioService.getUsers();
 
-        Assert.assertEquals(1, users.size());
+        Assert.assertEquals(2, users.size());
     }
 }
